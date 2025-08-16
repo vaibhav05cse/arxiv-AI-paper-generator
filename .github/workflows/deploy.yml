@@ -1,0 +1,22 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build and deploy
+        run: |
+          cd /home/ec2-user/arxiv-AI-paper-generator
+          git pull origin main
+          docker build -t arxiv-fastapi .
+          docker stop arxiv-app || true
+          docker rm arxiv-app || true
+          docker run -d -p 80:8000 --name arxiv-app arxiv-fastapi
